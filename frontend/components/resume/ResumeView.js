@@ -209,7 +209,7 @@ function ResumeContent() {
             <button
               onClick={reanalyze}
               disabled={analyze.loading}
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[var(--leaf)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#233f33] px-4 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(35,63,51,0.18)] transition hover:bg-[#2e6f55] disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RefreshCw
                 size={16}
@@ -276,26 +276,45 @@ function SkillCoverageGraph({ matchingCount, missingCount, matchPercentage }) {
           {match}%
         </span>
       </div>
-      <div
-        className="mt-4 flex h-4 overflow-hidden rounded-full bg-[#fbe8e2]"
-        role="img"
-        aria-label={`${match}% matching skills and ${gap}% missing skills`}
-      >
+      <div className="mt-6 flex flex-col items-center gap-6 sm:flex-row sm:items-center">
         <div
-          className="bg-[var(--leaf)] transition-all"
-          style={{ width: `${match}%` }}
-        />
-        <div className="flex-1 bg-[#e8a18d]" />
-      </div>
-      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[var(--ink-muted)]">
-        <span className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[var(--leaf)]" />
-          {matchingCount} matched skills
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#e8a18d]" />
-          {missingCount} skills to build
-        </span>
+          className="relative h-36 w-36 shrink-0 rounded-full"
+          role="img"
+          aria-label={`${match}% matching skills and ${gap}% missing skills`}
+          style={{
+            background: `conic-gradient(var(--leaf) 0 ${match}%, rgb(239 68 68 / 75%) ${match}% 100%)`,
+          }}
+        >
+          <div className="absolute inset-3 flex flex-col items-center justify-center rounded-full bg-white">
+            <span className="text-2xl font-semibold text-[var(--foreground)]">
+              {match}%
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-[var(--ink-muted)]">
+              matched
+            </span>
+          </div>
+        </div>
+        <div className="w-full space-y-3 text-sm text-[var(--ink-muted)]">
+          <div className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[var(--leaf)]" />
+              Matched skills
+            </span>
+            <strong className="text-[var(--foreground)]">
+              {matchingCount}
+            </strong>
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <span className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#ef4444]/75" />
+              Skills to build
+            </span>
+            <strong className="text-[var(--foreground)]">{missingCount}</strong>
+          </div>
+          <div className="border-t border-[var(--line)] pt-3 text-xs">
+            {gap}% of the current market skill set still needs attention.
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -364,7 +383,7 @@ function UploadForm({
       {error && <p className="mt-3 text-sm text-[#9b4e3b]">{error}</p>}
       <button
         disabled={!file || loading}
-        className="mt-3 h-11 w-full rounded-xl bg-[var(--leaf)] text-sm font-semibold text-white disabled:opacity-50"
+        className="mt-3 h-11 w-full rounded-xl bg-[#233f33] text-sm font-semibold text-white shadow-[0_8px_18px_rgba(35,63,51,0.18)] transition hover:bg-[#2e6f55] disabled:cursor-not-allowed disabled:bg-[#233f33] disabled:opacity-100"
       >
         {loading ? "Analyzing file..." : "Upload and analyze"}
       </button>

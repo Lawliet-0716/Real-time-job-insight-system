@@ -1,4 +1,12 @@
-export default function MetricCard({ label, value, note, tone = "green" }) {
+import { Activity } from "lucide-react";
+
+export default function MetricCard({
+  label,
+  value,
+  note,
+  tone = "green",
+  icon: Icon = Activity,
+}) {
   const tones = {
     green: "bg-[var(--leaf-soft)] text-[var(--leaf)]",
     yellow: "bg-[#fff3d7] text-[#936b19]",
@@ -10,7 +18,7 @@ export default function MetricCard({ label, value, note, tone = "green" }) {
       <div
         className={`mb-6 flex h-9 w-9 items-center justify-center rounded-xl text-xs font-bold ${tones[tone]}`}
       >
-        ●
+        <Icon size={18} strokeWidth={2.2} aria-hidden="true" />
       </div>
       <p className="text-sm text-[var(--ink-muted)]">{label}</p>
       <p className="mt-1 text-3xl font-semibold tracking-[-0.04em]">{value}</p>

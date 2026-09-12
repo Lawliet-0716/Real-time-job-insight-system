@@ -71,7 +71,16 @@ export const updateProfile = async (req, res) => {
     if (linkedin !== undefined) user.linkedin = linkedin;
     if (github !== undefined) user.github = github;
     if (portfolio !== undefined) user.portfolio = portfolio;
-    if (req.file) user.profilePicture = `/uploads/resumes/${req.file.filename}`;
+    const profilePicture = req.files?.profilePicture?.[0];
+    const resume = req.files?.resume?.[0];
+
+    if (profilePicture) {
+      user.profilePicture = `/uploads/resumes/${profilePicture.filename}`;
+    }
+    if (resume) {
+      user.resumeFile = `/uploads/resumes/${resume.filename}`;
+      user.resumeFileName = resume.originalname;
+    }
 
     await user.save();
 

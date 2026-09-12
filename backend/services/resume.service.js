@@ -64,7 +64,11 @@ export async function uploadResumeService(userId, file, roadmapDuration) {
   // Step 4: Compare Resume Skills
   // ==========================
 
-  const analysis = await compareSkills(extractedSkills, targetRole);
+  const analysis = await compareSkills(
+    extractedSkills,
+    targetRole,
+    extractedText,
+  );
 
   // ==========================
   // Step 5: Generate Recommendations
@@ -158,7 +162,7 @@ export async function analyzeMyResumeService(userId, roadmapDuration) {
 
   const resume = await Resume.findOne({
     user: userId,
-  });
+  }).sort({ createdAt: -1 });
 
   if (!resume) {
     throw new Error("Resume not found.");
@@ -176,6 +180,7 @@ export async function analyzeMyResumeService(userId, roadmapDuration) {
   const analysis = await compareSkills(
     resume.extractedSkills,
     resume.targetRole,
+    resume.extractedText,
   );
 
   // ==========================

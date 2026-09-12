@@ -21,8 +21,9 @@ Rules:
 5. No explanation.
 6. Remove duplicate skills.
 7. Ignore soft skills.
-8. Return no more than 25 skills.
-9. Include:
+8. Extract every distinct technical or professional skill explicitly present, up to 100 skills.
+9. Preserve the skill's original name, including punctuation and separators such as CI/CD, Node.js, and C++.
+10. Include:
    - Programming Languages
    - Frameworks
    - Libraries
@@ -55,7 +56,7 @@ Return exactly this format:
 
       temperature: 0,
 
-      max_completion_tokens: 400,
+      max_completion_tokens: 1600,
 
       reasoning_effort: "none",
 
@@ -109,10 +110,30 @@ Return exactly this format:
     const jsonMatch = jsonText.match(/\{\s*"skills"\s*:\s*\[[\s\S]*?\]\s*\}/);
 
     if (!jsonMatch) {
+      const skillsStart = jsonText.indexOf('"skills"');
+      const partialSkills =
+        skillsStart === -1
+          ? []
+          : [...jsonText.slice(skillsStart).matchAll(/"((?:\\.|[^"\\])*)"/g)]
+              .slice(1)
+              .map((match) => {
+                try {
+                  return JSON.parse(`"${match[1]}"`);
+                } catch {
+                  return "";
+                }
+              })
+              .filter(Boolean);
+
+      if (partialSkills.length > 0) {
+        console.warn(
+          `⚠️ AI response was truncated; recovered ${partialSkills.length} skills`,
+        );
+        return [...new Set(partialSkills)];
+      }
+
       console.error("❌ No valid skills JSON found in AI response");
-
       console.error("Cleaned response:", jsonText);
-
       return [];
     }
 

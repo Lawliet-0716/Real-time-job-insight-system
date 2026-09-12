@@ -10,12 +10,19 @@ function normalizeSkill(skill = "") {
   const aliases = {
     "react.js": "react",
     reactjs: "react",
+    "react js": "react",
     "node.js": "node",
     nodejs: "node",
+    "node js": "node",
     "next.js": "next",
     nextjs: "next",
+    "next js": "next",
     "express.js": "express",
     expressjs: "express",
+    "express js": "express",
+    "java script": "javascript",
+    "type script": "typescript",
+    "tailwind css": "tailwindcss",
     postgres: "postgresql",
     mongo: "mongodb",
     "c sharp": "c#",
@@ -28,7 +35,28 @@ function normalizeSkill(skill = "") {
   return aliases[normalized] || normalized.replace(/[.,]/g, "");
 }
 
-export async function compareSkills(resumeSkills, targetRole = "") {
+function skillKeys(skill) {
+  const normalized = normalizeSkill(skill);
+
+  return new Set([
+    normalized,
+    normalized.replace(/[\s._/-]+/g, ""),
+    normalized.replace(/[^a-z0-9+#]/g, ""),
+  ]);
+}
+
+function resumeTextKey(skill) {
+  return normalizeSkill(skill)
+    .replace(/[^a-z0-9+#]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export async function compareSkills(
+  resumeSkills,
+  targetRole = "",
+  resumeText = "",
+) {
   try {
     // ---------------------------------------
     // Fetch market skills
@@ -194,7 +222,18 @@ export async function compareSkills(resumeSkills, targetRole = "") {
     // Normalize resume skills
     // ---------------------------------------
 
-    const resumeSkillSet = new Set((resumeSkills || []).map(normalizeSkill));
+    const resumeSkillSet = new Set(
+      (resumeSkills || []).flatMap((skill) => [...skillKeys(skill)]),
+    );
+    const resumeTextValue = ` ${String(resumeText)
+      .toLowerCase()
+      .replace(/[^a-z0-9+#]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()} `;
+    const hasResumeSkill = (skill) =>
+      [...skillKeys(skill)].some((key) => resumeSkillSet.has(key)) ||
+      (resumeTextKey(skill).length > 0 &&
+        resumeTextValue.includes(` ${resumeTextKey(skill)} `));
 
     // ---------------------------------------
     const matchingSkills = [];
@@ -204,7 +243,7 @@ export async function compareSkills(resumeSkills, targetRole = "") {
     marketSkills.forEach((item) => {
       const normalizedSkill = normalizeSkill(item.skill);
 
-      if (resumeSkillSet.has(normalizedSkill)) {
+      if (hasResumeSkill(normalizedSkill)) {
         matchingSkills.push(item.skill);
       } else {
         missingSkills.push(item.skill);
@@ -238,7 +277,7 @@ export async function compareSkills(resumeSkills, targetRole = "") {
 
       totalWeight += weight;
 
-      if (resumeSkillSet.has(normalizeSkill(item.skill))) {
+      if (hasResumeSkill(item.skill)) {
         matchedWeight += weight;
       }
     });
@@ -261,7 +300,7 @@ export async function compareSkills(resumeSkills, targetRole = "") {
     // ---------------------------------------
 
     const skillGaps = marketSkills
-      .filter((item) => !resumeSkillSet.has(normalizeSkill(item.skill)))
+      .filter((item) => !hasResumeSkill(item.skill))
       .slice(0, 15)
       .map((item) => {
         const demandPercentage = Number(item.percentage) || 0;

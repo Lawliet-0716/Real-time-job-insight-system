@@ -1,19 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  ArrowUpRight,
   BarChart3,
   BriefcaseBusiness,
   FileText,
   LayoutDashboard,
   LogOut,
+  Mail,
+  Send,
   UserRound,
 } from "lucide-react";
 import { clearToken } from "../../lib/api";
 
+const CONTACT_EMAIL =
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@signaldesk.app";
+
 const links = [
-  { href: "/", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/jobs", label: "Job market", icon: BriefcaseBusiness },
   { href: "/resume", label: "Resume lab", icon: FileText },
   { href: "/profile", label: "Profile", icon: UserRound },
@@ -22,17 +29,32 @@ const links = [
 export default function AppShell({ children, eyebrow = "Workspace" }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [contactStatus, setContactStatus] = useState("");
 
   function signOut() {
     clearToken();
-    router.push("/login");
+    router.push("/");
+  }
+
+  function openContactEmail(event) {
+    event.preventDefault();
+    const subject = "SignalDesk project inquiry";
+    const body = `Email: ${contactEmail}\n\n${contactMessage}`;
+    const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setContactStatus("Opening your email app...");
+    window.location.assign(mailto);
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="flex min-h-screen flex-col bg-[var(--background)] text-[var(--foreground)]">
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[#f9faf6]/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center gap-4 px-5 py-4 sm:px-8 lg:px-12">
-          <Link href="/" className="mr-auto flex shrink-0 items-center gap-3">
+        <div className="mx-auto flex w-full flex-wrap items-center gap-4 px-5 py-4 sm:px-8 md:grid md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-8 lg:px-10">
+          <Link
+            href="/"
+            className="mr-auto flex shrink-0 items-center gap-3 md:mr-0"
+          >
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--leaf)] text-sm font-bold text-white">
               S
             </span>
@@ -45,7 +67,7 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
               </small>
             </span>
           </Link>
-          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto border-t border-[var(--line)] pt-3 md:order-2 md:w-auto md:border-t-0 md:pt-0">
+          <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto border-t border-[var(--line)] pt-3 md:order-2 md:w-full md:max-w-[620px] md:justify-self-center md:justify-between md:border-t-0 md:pt-0">
             {links.map(({ href, label, icon: Icon }) => {
               const active =
                 href === "/" ? pathname === href : pathname.startsWith(href);
@@ -76,11 +98,101 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
           </div>
         </div>
       </header>
-      <main className="min-h-screen">
-        <div className="mx-auto max-w-[1500px] px-5 py-6 sm:px-8 lg:px-12 lg:py-8">
+      <main className="flex-1">
+        <div className="w-full px-5 py-6 sm:px-8 lg:px-10 lg:py-8">
           {children}
         </div>
       </main>
+      <footer className="border-t border-[#1f4b3a] bg-[#233f33] text-white">
+        <div className="relative overflow-hidden px-5 py-12 sm:px-8 sm:py-16 lg:px-10">
+          <div className="relative z-10 grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+            <div>
+              <div className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#acd3b9]">
+                <span className="h-px w-8 bg-[#f5d98f]" />
+                Career intelligence
+              </div>
+              <h2 className="max-w-2xl text-4xl font-semibold leading-[0.98] tracking-[-0.06em] text-[#f6f7f2] sm:text-6xl">
+                Make your next move count.
+              </h2>
+              <p className="mt-6 max-w-md text-sm leading-6 text-[#c7d9cf]">
+                Follow the signal, sharpen your edge, and move toward work that
+                fits where you are going.
+              </p>
+              <Link
+                href="/jobs"
+                className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#f5d98f] transition hover:text-white"
+              >
+                Explore the job market <ArrowUpRight size={16} />
+              </Link>
+            </div>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="border-t border-[#527461] pt-5">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f5d98f]">
+                  About the makers
+                </p>
+                <p className="mt-3 text-sm leading-6 text-[#c7d9cf]">
+                  SignalDesk is a founder-led project built by developers who
+                  care about making career decisions more practical, focused,
+                  and evidence-based.
+                </p>
+                <p className="mt-4 text-xs font-semibold leading-5 text-[#f5d98f]">
+                  Created by Achuta S, Adithya S, Charan G, and Lepaksh S Gujar.
+                </p>
+                <p className="mt-1 text-xs leading-5 text-[#acd3b9]">
+                  Under the guidance of Mrs. Teja Shree V.
+                </p>
+              </div>
+              <form
+                onSubmit={openContactEmail}
+                className="border-t border-[#527461] pt-5"
+              >
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f5d98f]">
+                  Start a conversation
+                </p>
+                <div className="mt-3 flex items-center gap-2 border-b border-[#789686] pb-2">
+                  <Mail size={16} className="shrink-0 text-[#acd3b9]" />
+                  <input
+                    type="email"
+                    required
+                    value={contactEmail}
+                    onChange={(event) => setContactEmail(event.target.value)}
+                    placeholder="Your email"
+                    aria-label="Your email address"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-[#acd3b9]"
+                  />
+                </div>
+                <textarea
+                  required
+                  value={contactMessage}
+                  onChange={(event) => setContactMessage(event.target.value)}
+                  placeholder="Tell us about your idea"
+                  aria-label="Your message"
+                  rows={2}
+                  className="mt-4 w-full resize-none rounded-lg border border-[#527461] bg-[#1f382e] px-3 py-2 text-sm text-white outline-none placeholder:text-[#acd3b9] focus:border-[#f5d98f]"
+                />
+                <button
+                  type="submit"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#f5d98f] transition hover:text-white"
+                >
+                  Email the team <Send size={15} />
+                </button>
+                <p aria-live="polite" className="mt-2 text-xs text-[#acd3b9]">
+                  {contactStatus || `Or email ${CONTACT_EMAIL} directly.`}
+                </p>
+              </form>
+            </div>
+          </div>
+          <span
+            aria-hidden="true"
+            className="absolute -right-4 -bottom-20 text-[22rem] font-bold leading-none tracking-[-0.2em] text-[#2d5948]"
+          >
+            S
+          </span>
+        </div>
+        <div className="border-t border-[#527461] px-5 py-4 text-center text-xs text-[#acd3b9] sm:px-8 lg:px-10">
+          <p>© 2026 SignalDesk. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

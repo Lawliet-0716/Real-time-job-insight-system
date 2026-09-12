@@ -68,7 +68,10 @@ router.get("/profile", authMiddleware, getProfile);
 router.put(
   "/profile",
   authMiddleware,
-  upload.single("profilePicture"),
+  upload.fields([
+    { name: "profilePicture", maxCount: 1 },
+    { name: "resume", maxCount: 1 },
+  ]),
   updateProfile,
 );
 

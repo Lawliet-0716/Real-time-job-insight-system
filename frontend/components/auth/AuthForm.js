@@ -36,7 +36,7 @@ export default function AuthForm({ mode = "login" }) {
       }
 
       setToken(result.token);
-      router.push("/");
+      router.push("/dashboard");
     } catch (requestError) {
       setError(requestError.message);
     } finally {

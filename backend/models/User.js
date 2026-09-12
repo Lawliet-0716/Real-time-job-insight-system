@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    resumeFile: {
+      type: String,
+      default: "",
+    },
+
+    resumeFileName: {
+      type: String,
+      default: "",
+    },
+
     phone: {
       type: String,
       default: "",

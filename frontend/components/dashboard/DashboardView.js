@@ -4,8 +4,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  BriefcaseBusiness,
   Clock3,
+  FileCheck2,
+  Globe2,
   MapPin,
+  Radar,
   RefreshCw,
   Sparkles,
   TrendingUp,
@@ -16,6 +20,47 @@ import LoadingState, { ErrorState } from "../shared/LoadingState";
 import MetricCard from "../shared/MetricCard";
 import { api } from "../../lib/api";
 import { useApi } from "../../hooks/useApi";
+
+const skillColors = [
+  {
+    row: "border-transparent bg-white/60",
+    rank: "text-[#5b21b6]",
+    bar: "bg-[#5b21b6]",
+    signal: "text-[#5b21b6]",
+  },
+  {
+    row: "border-transparent bg-white/60",
+    rank: "text-[#5b21b6]",
+    bar: "bg-[#7c3aed]",
+    signal: "text-[#5b21b6]",
+  },
+  {
+    row: "border-transparent bg-white/60",
+    rank: "text-[#5b21b6]",
+    bar: "bg-[#a78bfa]",
+    signal: "text-[#5b21b6]",
+  },
+  {
+    row: "border-transparent bg-white/60",
+    rank: "text-[#5b21b6]",
+    bar: "bg-[#ddd6fe]",
+    signal: "text-[#5b21b6]",
+  },
+  {
+    row: "border-transparent bg-white/60",
+    rank: "text-[#5b21b6]",
+    bar: "bg-[#f3e8ff]",
+    signal: "text-[#5b21b6]",
+  },
+];
+
+const dailyVolumeColors = [
+  "bg-[#0284c7] group-hover:bg-[#0369a1]",
+  "bg-[#0ea5e9] group-hover:bg-[#0284c7]",
+  "bg-[#38bdf8] group-hover:bg-[#0ea5e9]",
+  "bg-[#7dd3fc] group-hover:bg-[#38bdf8]",
+  "bg-[#f0f9ff] group-hover:bg-[#7dd3fc]",
+];
 
 function DashboardContent() {
   const dashboard = useApi(api.getDashboard);
@@ -100,6 +145,7 @@ function DashboardContent() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Jobs in market"
+          icon={BriefcaseBusiness}
           value={marketData?.totalJobs ?? stats.totalJobs ?? "—"}
           note={
             marketData
@@ -109,12 +155,14 @@ function DashboardContent() {
         />
         <MetricCard
           label="Remote roles"
+          icon={Globe2}
           value={stats.remoteJobs ?? "—"}
           note="Open to location-flexible work"
           tone="yellow"
         />
         <MetricCard
           label="Resume fit"
+          icon={FileCheck2}
           value={stats.resumeScore ? `${Math.round(stats.resumeScore)}%` : "—"}
           note={
             resume?.targetRole
@@ -124,13 +172,14 @@ function DashboardContent() {
           tone="coral"
         />
         <MetricCard
-          label="Skill signals"
+          label="Trending skills"
+          icon={Radar}
           value={
             data?.trendingSkills?.length ?? stats.totalTrendingSkills ?? "—"
           }
           note={
             marketData
-              ? "Live signals from the global market"
+              ? "In-demand skills from live job data"
               : "Skills tracked from job demand"
           }
         />
@@ -164,13 +213,14 @@ function DashboardContent() {
                 ? percentageValue
                 : null;
               const share = Math.max(8, Math.round((demand / maxDemand) * 100));
+              const colors = skillColors[index % skillColors.length];
               return (
                 <div
                   key={skill.skill}
-                  className="rounded-xl border border-transparent bg-white/60 p-3 transition hover:border-[var(--line)] hover:bg-white"
+                  className={`rounded-xl border p-3 transition hover:bg-white ${colors.row}`}
                 >
                   <div className="mb-2 flex items-center gap-3 text-sm">
-                    <span className="w-5 text-xs font-bold text-[var(--ink-muted)]">
+                    <span className={`w-5 text-xs font-bold ${colors.rank}`}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="min-w-0 flex-1 truncate font-semibold">
@@ -182,7 +232,9 @@ function DashboardContent() {
                       </span>
                     )}
                     {percentage !== null ? (
-                      <span className="flex shrink-0 items-center gap-1 text-xs font-semibold text-[var(--leaf)]">
+                      <span
+                        className={`flex shrink-0 items-center gap-1 text-xs font-semibold ${colors.signal}`}
+                      >
                         <TrendingUp size={13} /> {percentage}%
                       </span>
                     ) : (
@@ -196,7 +248,7 @@ function DashboardContent() {
                   </div>
                   <div className="ml-8 h-2 overflow-hidden rounded-full bg-[#e9eee8]">
                     <div
-                      className={`h-full rounded-full ${index < 3 ? "bg-[var(--leaf)]" : "bg-[#82aa8f]"}`}
+                      className={`h-full rounded-full ${colors.bar}`}
                       style={{ width: `${share}%` }}
                     />
                   </div>
@@ -233,13 +285,13 @@ function DashboardContent() {
                 </span>
               </div>
               <div className="flex h-24 items-end gap-2">
-                {dailyTrend.map((day) => (
+                {dailyTrend.map((day, index) => (
                   <div
                     key={day.date}
                     className="group flex min-w-0 flex-1 flex-col items-center gap-2"
                   >
                     <div
-                      className="w-full rounded-t-md bg-[var(--leaf)] transition group-hover:bg-[#245b45]"
+                      className={`w-full rounded-t-md transition ${dailyVolumeColors[index % dailyVolumeColors.length]}`}
                       style={{
                         height: `${Math.max(10, Math.round((day.count / maxDailyJobs) * 72))}px`,
                       }}
