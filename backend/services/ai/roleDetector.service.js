@@ -47,15 +47,11 @@ Return ONLY this JSON format:
 `;
 
     const completion = await groq.chat.completions.create({
-      model: "/qwen3qwen.6-27b",
+      model: "openai/gpt-oss-120b",
 
       temperature: 0,
 
       max_completion_tokens: 300,
-
-      reasoning_effort: "none",
-
-      reasoning_format: "hidden",
 
       messages: [
         {

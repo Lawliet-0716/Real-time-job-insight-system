@@ -75,10 +75,6 @@ Rules:
 
       max_completion_tokens: 500,
 
-      reasoning_effort: "none",
-
-      reasoning_format: "hidden",
-
       messages: [
         {
           role: "user",

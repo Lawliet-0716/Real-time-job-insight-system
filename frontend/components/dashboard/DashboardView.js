@@ -64,15 +64,10 @@ const dailyVolumeColors = [
 
 function DashboardContent() {
   const dashboard = useApi(api.getDashboard);
-  const market = useApi(api.getMarket);
   const { execute: loadDashboard } = dashboard;
-  const { execute: loadMarket } = market;
   useEffect(() => {
     loadDashboard().catch(() => {});
   }, [loadDashboard]);
-  useEffect(() => {
-    loadMarket().catch(() => {});
-  }, [loadMarket]);
 
   if (dashboard.loading && !dashboard.data)
     return (
@@ -94,9 +89,8 @@ function DashboardContent() {
   const stats = data?.stats || {};
   const resume = data?.resume;
   const jobs = data?.recentJobs || [];
-  const marketData = market.data;
   const skills = data?.trendingSkills || [];
-  const dailyTrend = marketData?.dailyTrend || [];
+  const dailyTrend = data?.dailyTrend || [];
   const maxDailyJobs = Math.max(...dailyTrend.map((day) => day.count || 0), 1);
   const maxDemand = Math.max(
     ...skills.map((skill) => skill.count || skill.demandCount || 0),
@@ -117,6 +111,7 @@ function DashboardContent() {
       day: "numeric",
       hour: "numeric",
       minute: "2-digit",
+      timeZone: "UTC",
     }).format(new Date(value))}`;
   }
 
@@ -146,12 +141,8 @@ function DashboardContent() {
         <MetricCard
           label="Jobs in market"
           icon={BriefcaseBusiness}
-          value={marketData?.totalJobs ?? stats.totalJobs ?? "—"}
-          note={
-            marketData
-              ? `${marketData.jobs24h || 0} added in the last 24h`
-              : "Across the current index"
-          }
+          value={stats.totalJobs ?? "—"}
+          note={`${stats.jobs24h || 0} added in the last 24h`}
         />
         <MetricCard
           label="Remote roles"
@@ -177,11 +168,7 @@ function DashboardContent() {
           value={
             data?.trendingSkills?.length ?? stats.totalTrendingSkills ?? "—"
           }
-          note={
-            marketData
-              ? "In-demand skills from live job data"
-              : "Skills tracked from job demand"
-          }
+          note={"In-demand skills from stored job data"}
         />
       </section>
       <section className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
@@ -281,7 +268,7 @@ function DashboardContent() {
                   </p>
                 </div>
                 <span className="text-xs font-semibold text-[var(--leaf)]">
-                  {marketData.jobs24h?.toLocaleString() || 0} today
+                  {stats.jobs24h?.toLocaleString() || 0} today
                 </span>
               </div>
               <div className="flex h-24 items-end gap-2">
@@ -300,6 +287,7 @@ function DashboardContent() {
                     <span className="text-[10px] text-[var(--ink-muted)]">
                       {new Date(day.date).toLocaleDateString("en", {
                         weekday: "short",
+                        timeZone: "UTC",
                       })}
                     </span>
                   </div>

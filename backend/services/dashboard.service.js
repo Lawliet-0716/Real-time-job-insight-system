@@ -16,52 +16,87 @@ export async function getDashboardOverviewService(userId) {
   // Dashboard Statistics
   // ==========================
 
-  const [totalJobs, remoteJobs, extractedTrendingSkills, latestJob] =
-    await Promise.all([
-      Job.countDocuments(),
+  const since24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const sinceSevenDays = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000);
 
-      Job.countDocuments({
-        isRemote: true,
-      }),
+  const [
+    totalJobs,
+    jobs24h,
+    remoteJobs,
+    extractedTrendingSkills,
+    latestJob,
+    dailyJobCounts,
+  ] = await Promise.all([
+    Job.countDocuments(),
 
-      Job.aggregate([
-        {
-          $project: {
-            jobSkills: {
-              $setUnion: [
-                { $ifNull: ["$skills", []] },
-                { $ifNull: ["$technologies", []] },
-              ],
-            },
-          },
-        },
-        { $unwind: "$jobSkills" },
-        {
-          $project: {
-            skill: { $trim: { input: "$jobSkills" } },
-          },
-        },
-        { $match: { skill: { $ne: "" } } },
-        {
-          $group: {
-            _id: { $toLower: "$skill" },
-            skill: { $first: "$skill" },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { count: -1, skill: 1 } },
-        { $limit: 10 },
-        {
-          $project: {
-            _id: 0,
-            skill: 1,
-            count: 1,
-          },
-        },
-      ]),
+    Job.countDocuments({ createdAt: { $gte: since24Hours } }),
 
-      Job.findOne().sort({ updatedAt: -1 }).select("updatedAt").lean(),
-    ]);
+    Job.countDocuments({
+      isRemote: true,
+    }),
+
+    Job.aggregate([
+      {
+        $project: {
+          jobSkills: {
+            $setUnion: [
+              { $ifNull: ["$skills", []] },
+              { $ifNull: ["$technologies", []] },
+            ],
+          },
+        },
+      },
+      { $unwind: "$jobSkills" },
+      {
+        $project: {
+          skill: { $trim: { input: "$jobSkills" } },
+        },
+      },
+      { $match: { skill: { $ne: "" } } },
+      {
+        $group: {
+          _id: { $toLower: "$skill" },
+          skill: { $first: "$skill" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1, skill: 1 } },
+      { $limit: 10 },
+      {
+        $project: {
+          _id: 0,
+          skill: 1,
+          count: 1,
+        },
+      },
+    ]),
+
+    Job.findOne().sort({ updatedAt: -1 }).select("updatedAt").lean(),
+
+    Job.aggregate([
+      { $match: { createdAt: { $gte: sinceSevenDays } } },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $project: { _id: 0, date: "$_id", count: 1 } },
+      { $sort: { date: 1 } },
+    ]),
+  ]);
+
+  const dailyCountMap = new Map(
+    dailyJobCounts.map((day) => [day.date, day.count]),
+  );
+  const dailyTrend = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(sinceSevenDays);
+    date.setDate(sinceSevenDays.getDate() + index);
+    const dateKey = date.toISOString().slice(0, 10);
+    return { date: dateKey, count: dailyCountMap.get(dateKey) || 0 };
+  });
 
   const trendingSkills = extractedTrendingSkills.map((skill) => ({
     ...skill,
@@ -90,6 +125,8 @@ export async function getDashboardOverviewService(userId) {
   return {
     stats: {
       totalJobs,
+
+      jobs24h,
 
       remoteJobs,
 
@@ -137,6 +174,8 @@ export async function getDashboardOverviewService(userId) {
     trendingSkills,
 
     skillsLastUpdated: latestJob?.updatedAt || null,
+
+    dailyTrend,
 
     // ==========================
     // Latest Jobs

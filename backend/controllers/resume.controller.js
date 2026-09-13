@@ -20,7 +20,7 @@ export async function uploadResume(req, res) {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    res.status(error.statusCode || 500).json({
       success: false,
       message: error.message,
     });

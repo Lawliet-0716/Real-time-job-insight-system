@@ -1,4 +1,20 @@
 import groq from "./groq.service.js";
+import AppError from "../../utils/appError.js";
+
+const RATE_LIMIT_RETRY_DELAY = 17000;
+
+function getRetryDelay(error) {
+  const retryAfter = error?.headers?.get?.("retry-after");
+  const retryAfterSeconds = Number(retryAfter);
+
+  return Number.isFinite(retryAfterSeconds)
+    ? Math.min(Math.max(retryAfterSeconds * 1000, 1000), 30000)
+    : RATE_LIMIT_RETRY_DELAY;
+}
+
+function isRateLimitError(error) {
+  return error?.status === 429 || error?.statusCode === 429;
+}
 
 export async function extractResumeSkills(resumeText) {
   try {
@@ -51,30 +67,37 @@ Return exactly this format:
 }
 `;
 
-    const completion = await groq.chat.completions.create({
-      model: "qwen/qwen3.6-27b",
-
+    const request = {
+      model: "openai/gpt-oss-120b",
       temperature: 0,
-
-      max_completion_tokens: 1600,
-
-      reasoning_effort: "none",
-
-      reasoning_format: "hidden",
-
+      reasoning_effort: "low",
+      max_completion_tokens: 1200,
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "user",
           content: prompt,
         },
       ],
-    });
+    };
 
-    const content = completion?.choices?.[0]?.message?.content;
+    let completion;
+    try {
+      completion = await groq.chat.completions.create(request);
+    } catch (error) {
+      if (!isRateLimitError(error)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, getRetryDelay(error)));
+      completion = await groq.chat.completions.create(request);
+    }
+
+    const message = completion?.choices?.[0]?.message;
+    const content = message?.content || message?.reasoning;
 
     console.log("\n========== AI RESUME RESPONSE ==========");
 
     console.log(content);
+
+    console.log("Finish reason:", completion?.choices?.[0]?.finish_reason);
 
     console.log("========================================\n");
 
@@ -195,6 +218,13 @@ Return exactly this format:
     console.error("❌ Resume Skill Extraction Error");
 
     console.error(error.response?.data || error.message);
+
+    if (isRateLimitError(error)) {
+      throw new AppError(
+        "Resume analysis is temporarily rate-limited. Please try again shortly.",
+        429,
+      );
+    }
 
     return [];
   }

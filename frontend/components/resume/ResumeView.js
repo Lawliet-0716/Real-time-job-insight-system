@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, FileUp, RefreshCw, Target, X } from "lucide-react";
+import {
+  Check,
+  FileUp,
+  LoaderCircle,
+  RefreshCw,
+  Target,
+  X,
+} from "lucide-react";
 import AppShell from "../layout/AppShell";
 import AuthGuard from "../layout/AuthGuard";
 import LoadingState, { ErrorState } from "../shared/LoadingState";
@@ -41,6 +48,7 @@ function ResumeContent() {
       </AppShell>
     );
   const data = resume.data?.data;
+  const uploadLoading = upload.loading || resume.loading;
   return (
     <AppShell eyebrow="Resume lab">
       <header className="mb-8">
@@ -80,7 +88,7 @@ function ResumeContent() {
             duration={roadmapDuration}
             setDuration={setRoadmapDuration}
             onSubmit={submitUpload}
-            loading={upload.loading}
+            loading={uploadLoading}
             error={upload.error}
           />
         </section>
@@ -107,7 +115,7 @@ function ResumeContent() {
                 duration={roadmapDuration}
                 setDuration={setRoadmapDuration}
                 onSubmit={submitUpload}
-                loading={upload.loading}
+                loading={uploadLoading}
                 error={upload.error}
                 compact
               />
@@ -385,7 +393,14 @@ function UploadForm({
         disabled={!file || loading}
         className="mt-3 h-11 w-full rounded-xl bg-[#233f33] text-sm font-semibold text-white shadow-[0_8px_18px_rgba(35,63,51,0.18)] transition hover:bg-[#2e6f55] disabled:cursor-not-allowed disabled:bg-[#233f33] disabled:opacity-100"
       >
-        {loading ? "Analyzing file..." : "Upload and analyze"}
+        {loading ? (
+          <span className="inline-flex items-center justify-center gap-2">
+            <LoaderCircle size={16} className="animate-spin" />
+            Analyzing file...
+          </span>
+        ) : (
+          "Upload and analyze"
+        )}
       </button>
     </form>
   );
