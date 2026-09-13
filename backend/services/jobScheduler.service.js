@@ -1,45 +1,39 @@
 import cron from "node-cron";
 import { fetchJSearchJobs } from "./jobProvider.service.js";
 
+export async function synchronizeScheduledJobs() {
+  console.log("⏰ Starting job synchronization...");
+
+  try {
+    const queries = [
+      "Software Engineer",
+      "Backend Developer",
+      "Frontend Developer",
+      "Full Stack Developer",
+      "Data Analyst",
+    ];
+
+    for (const query of queries) {
+      console.log(`Fetching jobs for: ${query}`);
+      await fetchJSearchJobs(query, 1, 1, { datePosted: "today" });
+    }
+
+    console.log("✅ Job synchronization completed.");
+  } catch (error) {
+    console.error("❌ Job synchronization failed:", error.message);
+  }
+}
+
 export function startJobScheduler() {
-  // Runs once every 24 hours at midnight IST and fetches today's listings.
-  cron.schedule(
-    "0 0 * * *",
+  // Runs daily at midnight IST after the initial startup synchronization.
+  cron.schedule("0 0 * * *", synchronizeScheduledJobs, {
+    scheduled: true,
+    timezone: "Asia/Kolkata",
+  });
 
-    async () => {
-      console.log("⏰ Starting scheduled job synchronization...");
+  console.log("⏰ Job scheduler started. Daily run: midnight IST.");
 
-      try {
-        const queries = [
-          "Software Engineer",
-          "Backend Developer",
-          "Frontend Developer",
-          "Full Stack Developer",
-          "Data Analyst",
-        ];
-
-        for (const query of queries) {
-          console.log(`Fetching jobs for: ${query}`);
-
-          await fetchJSearchJobs(query, 1, 1, { datePosted: "today" });
-        }
-
-        console.log("✅ Scheduled job synchronization completed.");
-      } catch (error) {
-        console.error(
-          "❌ Scheduled job synchronization failed:",
-          error.message,
-        );
-      }
-    },
-
-    {
-      scheduled: true,
-      timezone: "Asia/Kolkata",
-    },
-  );
-
-  console.log(
-    "⏰ Job scheduler started. Scheduled every 24 hours for today's listings (midnight IST).",
-  );
+  // Render services can restart or sleep between cron executions, so sync once
+  // immediately after a successful server start as well.
+  void synchronizeScheduledJobs();
 }

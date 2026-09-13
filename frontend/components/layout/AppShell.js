@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowUpRight,
@@ -40,7 +41,7 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
 
   function openContactEmail(event) {
     event.preventDefault();
-    const subject = "SignalDesk project inquiry";
+    const subject = "CareerWise project inquiry";
     const body = `Email: ${contactEmail}\n\n${contactMessage}`;
     const mailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setContactStatus("Opening your email app...");
@@ -55,17 +56,14 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
             href="/"
             className="mr-auto flex shrink-0 items-center gap-3 md:mr-0"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--leaf)] text-sm font-bold text-white">
-              S
-            </span>
-            <span>
-              <strong className="block text-lg tracking-[-0.04em]">
-                SignalDesk
-              </strong>
-              <small className="text-[11px] text-[var(--ink-muted)]">
-                career intelligence
-              </small>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="CareerWise"
+              width={150}
+              height={54}
+              priority
+              className="h-11 w-auto object-contain object-left"
+            />
           </Link>
           <nav className="order-3 flex w-full items-center gap-1 overflow-x-auto border-t border-[var(--line)] pt-3 md:order-2 md:w-full md:max-w-[620px] md:justify-self-center md:justify-between md:border-t-0 md:pt-0">
             {links.map(({ href, label, icon: Icon }) => {
@@ -131,7 +129,7 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
                   About the makers
                 </p>
                 <p className="mt-3 text-sm leading-6 text-[#c7d9cf]">
-                  SignalDesk is a founder-led project built by developers who
+                  CareerWise is a founder-led project built by developers who
                   care about making career decisions more practical, focused,
                   and evidence-based.
                 </p>
@@ -190,7 +188,7 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
           </span>
         </div>
         <div className="border-t border-[#527461] px-5 py-4 text-center text-xs text-[#acd3b9] sm:px-8 lg:px-10">
-          <p>© 2026 SignalDesk. All rights reserved.</p>
+          <p>© 2026 CareerWise. All rights reserved.</p>
         </div>
       </footer>
     </div>

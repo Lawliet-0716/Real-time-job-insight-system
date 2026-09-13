@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, LockKeyhole, Mail, UserRound } from "lucide-react";
@@ -50,10 +51,13 @@ export default function AuthForm({ mode = "login" }) {
         <div className="hidden bg-[#233f33] p-10 text-white md:flex md:flex-col md:justify-between">
           <div>
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#8fc6a1] font-bold text-[#173b2d]">
-                S
-              </span>
-              <strong className="text-lg">SignalDesk</strong>
+              <Image
+                src="/logo.png"
+                alt="CareerWise"
+                width={150}
+                height={54}
+                className="h-11 w-auto rounded-lg bg-white object-contain object-left px-2"
+              />
             </div>
             <h1 className="mt-20 text-4xl font-semibold leading-tight tracking-[-0.06em]">
               Make the market legible.
@@ -163,7 +167,7 @@ export default function AuthForm({ mode = "login" }) {
             </button>
           </form>
           <p className="mt-7 text-center text-sm text-[var(--ink-muted)]">
-            {isRegister ? "Already have an account?" : "New to SignalDesk?"}{" "}
+            {isRegister ? "Already have an account?" : "New to CareerWise?"}{" "}
             <Link
               href={isRegister ? "/login" : "/register"}
               className="font-semibold text-[var(--leaf)]"

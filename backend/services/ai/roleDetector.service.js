@@ -47,7 +47,7 @@ Return ONLY this JSON format:
 `;
 
     const completion = await groq.chat.completions.create({
-      model: "qwen/qwen3.6-27b",
+      model: "/qwen3qwen.6-27b",
 
       temperature: 0,
 

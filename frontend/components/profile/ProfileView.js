@@ -105,7 +105,7 @@ export default function ProfileView() {
                 <img
                   src={profilePreview || getAssetUrl(form.profilePicture)}
                   alt="Profile"
-                  className="h-full w-full object-cover"
+                  className="h-auto w-auto max-h-full max-w-full object-contain"
                 />
               ) : (
                 <ImagePlus size={28} />

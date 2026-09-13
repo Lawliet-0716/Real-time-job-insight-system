@@ -85,9 +85,48 @@ const capabilities = [
   ],
 ];
 
+const signalSlides = [
+  {
+    number: "01",
+    title: "Create a stronger resume.",
+    text: "Build a clear, focused resume that presents your experience and strengths for the roles you want.",
+    image: "/1.png",
+    alt: "Creating a resume in CareerWise",
+  },
+  {
+    number: "02",
+    title: "Check your ATS score.",
+    text: "Analyze how well your resume matches a role and find the improvements that can help it pass ATS screening.",
+    image: "/2.png",
+    alt: "Checking an ATS score and resume analysis in CareerWise",
+  },
+  {
+    number: "03",
+    title: "Detect your real skill gaps.",
+    text: "Compare your current skills with your target role to understand exactly what you need to improve.",
+    image: "/3.png",
+    alt: "Detecting skill gaps in CareerWise",
+  },
+  {
+    number: "04",
+    title: "Learn and prepare for interviews.",
+    text: "Follow a focused learning path, practice the right skills, and prepare with more confidence for interviews.",
+    image: "/4.png",
+    alt: "Learning skills and preparing for interviews",
+  },
+  {
+    number: "05",
+    title: "Crack the interview.",
+    text: "Use everything you have built and practiced to show up ready and move closer to the role you want.",
+    image: "/5.png",
+    alt: "Cracking a job interview with CareerWise",
+  },
+];
+
 export default function Home() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactMessage, setContactMessage] = useState("");
+  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     const elements = document.querySelectorAll(".reveal-on-scroll");
@@ -106,32 +145,39 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveSlide(
+        (currentSlide) => (currentSlide + 1) % signalSlides.length,
+      );
+    }, 3000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   function submitContact(event) {
     event.preventDefault();
     const body = `Email: ${contactEmail}\n\n${contactMessage}`;
     window.location.assign(
-      `mailto:hello@signaldesk.app?subject=${encodeURIComponent("SignalDesk project inquiry")}&body=${encodeURIComponent(body)}`,
+      `mailto:hello@signaldesk.app?subject=${encodeURIComponent("CareerWise project inquiry")}&body=${encodeURIComponent(body)}`,
     );
   }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
       <header className="relative z-10 border-b border-[var(--line)] bg-[#f9faf6]">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
           <Link href="/" className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--leaf)] text-sm font-bold text-white">
-              S
-            </span>
-            <span>
-              <strong className="block text-lg tracking-[-0.04em]">
-                SignalDesk
-              </strong>
-              <small className="text-[11px] text-[var(--ink-muted)]">
-                career intelligence
-              </small>
-            </span>
+            <Image
+              src="/logo.png"
+              alt="CareerWise"
+              width={180}
+              height={54}
+              priority
+              className="h-14 w-auto object-contain object-left"
+            />
           </Link>
-          <nav className="flex items-center gap-5 text-sm font-semibold">
+          <nav className="ml-auto flex items-center gap-8 text-sm font-semibold">
             <a
               href="#approach"
               className="hidden text-[var(--ink-muted)] transition hover:text-[var(--leaf)] lg:inline"
@@ -164,7 +210,7 @@ export default function Home() {
               Your next move deserves more than a guess.
             </h1>
             <p className="reveal-on-scroll mt-8 max-w-xl text-base leading-7 text-[#c7d9cf] sm:text-lg">
-              SignalDesk connects your resume to the market around you, so you
+              CareerWise connects your resume to the market around you, so you
               can see what fits, what is changing, and where to put your energy
               next.
             </p>
@@ -346,6 +392,69 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="overflow-hidden bg-[#f6f7f2] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
+        <div className="mx-auto grid max-w-[1600px] items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
+          <div className="reveal-on-scroll max-w-xl" aria-live="polite">
+            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[var(--leaf)]">
+              <span className="h-px w-10 bg-[var(--sun)]" />
+              Signal {signalSlides[activeSlide].number} / 05
+            </p>
+            <h2 className="mt-5 text-4xl font-semibold leading-[0.98] tracking-[-0.07em] sm:text-6xl">
+              {signalSlides[activeSlide].title}
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-7 text-[var(--ink-muted)] sm:text-lg">
+              {signalSlides[activeSlide].text}
+            </p>
+          </div>
+          <div className="reveal-on-scroll relative overflow-hidden rounded-[2rem] bg-[#233f33] p-2 shadow-[0_20px_60px_rgba(33,61,45,0.16)] sm:p-3">
+            <div className="relative aspect-[3/2] overflow-hidden rounded-[1.5rem] bg-[#dfe9df]">
+              <Image
+                key={signalSlides[activeSlide].image}
+                src={signalSlides[activeSlide].image}
+                alt={signalSlides[activeSlide].alt}
+                fill
+                sizes="(min-width: 1024px) 60vw, 100vw"
+                className="animate-[rise-in_700ms_ease-out] object-cover"
+                priority={activeSlide === 0}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="overflow-hidden bg-[#101514] px-5 py-16 text-white sm:px-8 sm:py-24 lg:px-12">
+        <div className="mx-auto grid max-w-[1600px] items-center gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:gap-28">
+          <div className="reveal-on-scroll relative order-1 overflow-hidden rounded-[2rem] bg-[#233f33] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.24)] sm:p-3 lg:order-none">
+            <video
+              className="aspect-video w-full scale-[1.1] rounded-[1.5rem] object-cover"
+              src="/video.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="CareerWise workspace preview"
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-0 right-0 h-16 w-16 rounded-tl-[1.5rem] bg-[#111c19]"
+            />
+          </div>
+          <div className="reveal-on-scroll order-2 lg:order-none">
+            <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#acd3b9]">
+              <span className="h-px w-10 bg-[#f5d98f]" /> See it in action
+            </p>
+            <h2 className="mt-5 max-w-lg text-4xl font-semibold leading-[0.98] tracking-[-0.07em] sm:text-6xl">
+              Your next move, made clearer.
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-7 text-[#c7d9cf] sm:text-lg">
+              CareerWise brings your resume, market signals, and practical next
+              steps together in one focused workspace.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section className="reveal-on-scroll overflow-hidden bg-[#eef2eb] py-20 sm:py-28">
         <div className="mb-10 px-5 sm:px-8 lg:px-12">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--leaf)]">
@@ -356,25 +465,21 @@ export default function Home() {
           </h2>
         </div>
         <div className="grid gap-6 px-5 pb-4 sm:grid-cols-2 sm:px-8 lg:px-12 xl:grid-cols-3">
-          {storyCards.map(({ type, title, text, color, image, icon: Icon }) => (
+          {storyCards.map(({ type, title, text, image }) => (
             <article
               key={type}
               className="group reveal-on-scroll overflow-hidden rounded-2xl bg-white shadow-[0_14px_40px_rgba(33,61,45,0.08)]"
             >
-              <div
-                className={`relative aspect-[16/9] overflow-hidden ${color}`}
-              >
+              <div className="relative aspect-[16/9] overflow-hidden bg-white">
                 <Image
                   src={image}
                   alt={type.toLowerCase()}
                   fill
                   sizes="(min-width: 1280px) 30vw, (min-width: 640px) 45vw, 90vw"
-                  className="object-cover transition duration-500 group-hover:scale-105"
+                  quality={100}
+                  unoptimized
+                  className="scale-[1.28] object-cover transition duration-500 group-hover:scale-[1.34]"
                 />
-                <div className="absolute inset-0 bg-black/5" />
-                <div className="absolute left-5 top-5 flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-[var(--foreground)] shadow-sm backdrop-blur-sm">
-                  <Icon size={22} />
-                </div>
               </div>
               <div className="p-6">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--leaf)]">
@@ -466,7 +571,7 @@ export default function Home() {
           </span>
         </div>
         <div className="border-t border-[#527461] px-5 py-4 text-center text-xs text-[#acd3b9] sm:px-8 lg:px-12">
-          © 2026 SignalDesk. All rights reserved.
+          © 2026 CareerWise. All rights reserved.
         </div>
       </footer>
     </main>

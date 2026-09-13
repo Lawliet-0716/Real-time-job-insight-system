@@ -12,8 +12,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "SignalDesk | Job Market Intelligence",
+  title: "CareerWise | Job Market Intelligence",
   description: "A focused workspace for job-market signals and resume growth.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {
