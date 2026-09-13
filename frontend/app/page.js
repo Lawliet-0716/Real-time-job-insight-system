@@ -394,7 +394,11 @@ export default function Home() {
 
       <section className="overflow-hidden bg-[#f6f7f2] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto grid max-w-[1600px] items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20">
-          <div className="reveal-on-scroll max-w-xl" aria-live="polite">
+          <div
+            key={signalSlides[activeSlide].number}
+            className="reveal-on-scroll signal-slide-enter max-w-xl"
+            aria-live="polite"
+          >
             <p className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[var(--leaf)]">
               <span className="h-px w-10 bg-[var(--sun)]" />
               Signal {signalSlides[activeSlide].number} / 05
@@ -414,7 +418,7 @@ export default function Home() {
                 alt={signalSlides[activeSlide].alt}
                 fill
                 sizes="(min-width: 1024px) 60vw, 100vw"
-                className="animate-[rise-in_700ms_ease-out] object-cover"
+                className="signal-slide-enter object-cover"
                 priority={activeSlide === 0}
               />
             </div>
