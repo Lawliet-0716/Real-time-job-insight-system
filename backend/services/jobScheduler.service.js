@@ -11,6 +11,8 @@ export async function synchronizeScheduledJobs() {
       "Frontend Developer",
       "Full Stack Developer",
       "Data Analyst",
+      "DevOps Engineer",
+      "Machine Learning Engineer",
     ];
 
     for (const query of queries) {
