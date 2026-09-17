@@ -166,7 +166,7 @@ export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
       <header className="relative z-10 border-b border-[var(--line)] bg-[#f9faf6]">
-        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center px-5 py-5 sm:px-8 lg:px-12">
           <Link href="/" className="flex items-center gap-3">
             <Image
               src="/logo.png"
@@ -195,6 +195,12 @@ export default function Home() {
               className="inline-flex h-10 items-center gap-2 rounded-xl bg-[var(--leaf)] px-4 text-white transition hover:bg-[#245b45]"
             >
               Get started <ArrowRight size={15} />
+            </Link>
+            <Link
+              href="/about"
+              className="text-[var(--ink-muted)] transition hover:text-[var(--leaf)]"
+            >
+              About us
             </Link>
           </nav>
         </div>
@@ -527,11 +533,12 @@ export default function Home() {
               >
                 Build your signal <ArrowRight size={16} />
               </Link>
-              <p className="mt-10 max-w-md text-xs leading-5 text-[#acd3b9]">
-                Created by Achuta S, Adithya S, Charan G, and Lepaksh S Gujar.
-                <br />
-                Under the guidance of Mrs. Teja Shree V.
-              </p>
+              <Link
+                href="/about"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#acd3b9] transition hover:text-white"
+              >
+                About us <ArrowRight size={16} />
+              </Link>
             </div>
             <form
               onSubmit={submitContact}

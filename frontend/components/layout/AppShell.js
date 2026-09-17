@@ -122,24 +122,14 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
               >
                 Explore the job market <ArrowUpRight size={16} />
               </Link>
+              <Link
+                href="/about"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#acd3b9] transition hover:text-white"
+              >
+                About us <ArrowUpRight size={16} />
+              </Link>
             </div>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="border-t border-[#527461] pt-5">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f5d98f]">
-                  About the makers
-                </p>
-                <p className="mt-3 text-sm leading-6 text-[#c7d9cf]">
-                  CareerWise is a founder-led project built by developers who
-                  care about making career decisions more practical, focused,
-                  and evidence-based.
-                </p>
-                <p className="mt-4 text-xs font-semibold leading-5 text-[#f5d98f]">
-                  Created by Achuta S, Adithya S, Charan G, and Lepaksh S Gujar.
-                </p>
-                <p className="mt-1 text-xs leading-5 text-[#acd3b9]">
-                  Under the guidance of Mrs. Teja Shree V.
-                </p>
-              </div>
               <form
                 onSubmit={openContactEmail}
                 className="border-t border-[#527461] pt-5"
