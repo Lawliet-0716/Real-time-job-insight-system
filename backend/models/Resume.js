@@ -42,6 +42,11 @@ const resumeSchema = new mongoose.Schema(
       default: [],
     },
 
+    learnedSkills: {
+      type: [String],
+      default: [],
+    },
+
     // Prioritized skill gaps
     skillGaps: {
       type: [
@@ -112,6 +117,18 @@ const resumeSchema = new mongoose.Schema(
 
           tasks: {
             type: [String],
+            default: [],
+          },
+        },
+      ],
+      default: [],
+    },
+
+    roadmapProgress: {
+      type: [
+        {
+          completedTasks: {
+            type: [Boolean],
             default: [],
           },
         },

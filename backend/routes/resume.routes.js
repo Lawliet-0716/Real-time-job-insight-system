@@ -5,7 +5,8 @@ import upload from "../config/multer.js";
 import {
     uploadResume,
     getMyResume,
-    analyzeMyResume
+    analyzeMyResume,
+    updateRoadmapTask,
 } from "../controllers/resume.controller.js";
 
 import authMiddleware from "../middleware/auth.middleware.js";
@@ -99,6 +100,12 @@ router.post(
     "/analyze",
     authMiddleware,
     analyzeMyResume
+);
+
+router.patch(
+    "/roadmap/task",
+    authMiddleware,
+    updateRoadmapTask
 );
 
 export default router;

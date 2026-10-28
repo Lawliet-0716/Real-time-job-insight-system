@@ -34,7 +34,8 @@ export const fetchJSearchJobs = async (
     // Step 2: AI Skill Extraction (Parallel)
     await Promise.all(
       mappedJobs.map(async (job) => {
-        job.skills = await extractJobSkills(job.title, job.description);
+        const extractedSkills = await extractJobSkills(job.title, job.description);
+        job.skills = [...new Set([...job.skills, ...extractedSkills])];
       }),
     );
 

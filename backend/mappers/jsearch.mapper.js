@@ -1,4 +1,15 @@
 const mapJSearchJob = (job) => {
+    const requiredSkills = Array.isArray(job.job_required_skills)
+        ? job.job_required_skills
+        : typeof job.job_required_skills === "string"
+            ? job.job_required_skills.split(/[,;|]/)
+            : [];
+    const skills = [...new Set(
+        requiredSkills
+            .filter((skill) => typeof skill === "string")
+            .map((skill) => skill.trim())
+            .filter(Boolean)
+    )];
 
     return {
 
@@ -52,7 +63,7 @@ const mapJSearchJob = (job) => {
 
         experience: "",
 
-        skills: [],
+        skills,
 
         technologies: [],
 

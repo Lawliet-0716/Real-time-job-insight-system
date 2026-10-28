@@ -7,6 +7,7 @@ import AppShell from "../layout/AppShell";
 import AuthGuard from "../layout/AuthGuard";
 import LoadingState, { ErrorState } from "../shared/LoadingState";
 import { api } from "../../lib/api";
+import { getJobSkills } from "../../lib/jobSkills";
 import { useApi } from "../../hooks/useApi";
 
 export default function JobDetailView({ id }) {
@@ -32,6 +33,7 @@ export default function JobDetailView({ id }) {
     );
   const job = jobRequest.data?.job;
   if (!job) return null;
+  const skills = getJobSkills(job);
   return (
     <AppShell eyebrow="Job market">
       <Link
@@ -88,7 +90,7 @@ export default function JobDetailView({ id }) {
               Skills mentioned
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {(job.skills || []).map((skill) => (
+              {skills.map((skill) => (
                 <span
                   key={skill}
                   className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-[#d9e6dd]"
@@ -96,6 +98,11 @@ export default function JobDetailView({ id }) {
                   {skill}
                 </span>
               ))}
+              {skills.length === 0 && (
+                <p className="text-sm text-[#d9e6dd]">
+                  No specific skills were listed for this role.
+                </p>
+              )}
             </div>
           </div>
         </aside>

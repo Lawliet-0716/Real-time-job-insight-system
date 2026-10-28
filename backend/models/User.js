@@ -76,6 +76,11 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
 
+    roadmapActivityDates: {
+      type: [String],
+      default: [],
+    },
+
     linkedin: {
       type: String,
       default: "",

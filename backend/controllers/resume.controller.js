@@ -2,6 +2,7 @@ import {
   uploadResumeService,
   getMyResumeService,
   analyzeMyResumeService,
+  updateRoadmapTaskService,
 } from "../services/resume.service.js";
 
 export async function uploadResume(req, res) {
@@ -59,6 +60,32 @@ export async function analyzeMyResume(req, res) {
     console.error(error);
 
     res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+export async function updateRoadmapTask(req, res) {
+  try {
+    const { weekIndex, taskIndex, completed } = req.body || {};
+    const resume = await updateRoadmapTaskService(
+      req.user.id,
+      weekIndex,
+      taskIndex,
+      completed,
+    );
+
+    res.json({
+      success: true,
+      data: resume,
+    });
+  } catch (error) {
+    if (error.statusCode === 500 || !error.statusCode) {
+      console.error(error);
+    }
+
+    res.status(error.statusCode || 500).json({
       success: false,
       message: error.message,
     });

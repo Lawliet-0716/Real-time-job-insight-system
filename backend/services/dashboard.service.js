@@ -1,5 +1,6 @@
 import Resume from "../models/Resume.js";
 import Job from "../models/Job.js";
+import { getSkillsToLearn } from "../utils/learningSkills.js";
 
 export async function getDashboardOverviewService(userId) {
   // ==========================
@@ -160,6 +161,13 @@ export async function getDashboardOverviewService(userId) {
           matchingSkills: resume.matchingSkills,
 
           missingSkills: resume.missingSkills,
+
+          learnedSkills: resume.learnedSkills || [],
+
+          skillsToLearn: getSkillsToLearn(
+            resume.missingSkills,
+            resume.learnedSkills,
+          ),
 
           recommendations: resume.recommendations,
 

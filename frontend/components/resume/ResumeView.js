@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Check,
+  Flame,
   FileUp,
   LoaderCircle,
   RefreshCw,
@@ -22,6 +23,7 @@ function ResumeContent() {
   const resume = useApi(api.getResume);
   const upload = useApi(api.uploadResume);
   const analyze = useApi(api.analyzeResume);
+  const updateRoadmapTask = useApi(api.updateRoadmapTask);
   const { execute: loadResume } = resume;
   useEffect(() => {
     loadResume().catch(() => {});
@@ -41,6 +43,16 @@ function ResumeContent() {
       await resume.execute();
     } catch {}
   }
+  async function toggleRoadmapTask(weekIndex, taskIndex, completed) {
+    try {
+      const result = await updateRoadmapTask.execute(
+        weekIndex,
+        taskIndex,
+        completed,
+      );
+      resume.setData(result);
+    } catch {}
+  }
   if (resume.loading && !resume.data)
     return (
       <AppShell>
@@ -48,6 +60,27 @@ function ResumeContent() {
       </AppShell>
     );
   const data = resume.data?.data;
+  const learnedSkills = data?.learnedSkills || [];
+  const currentMatchingSkills = data?.matchingSkills || [];
+  const matchingSkills = [
+    ...currentMatchingSkills,
+    ...learnedSkills.filter(
+      (learnedSkill) =>
+        !currentMatchingSkills.some(
+          (matchingSkill) =>
+            matchingSkill.toLowerCase() === learnedSkill.toLowerCase(),
+        ),
+    ),
+  ];
+  const skillsToLearn = data?.skillsToLearn ?? data?.missingSkills ?? [];
+  const currentSignalMatchPercentage =
+    matchingSkills.length + skillsToLearn.length > 0
+      ? Math.round(
+          (matchingSkills.length /
+            (matchingSkills.length + skillsToLearn.length)) *
+            100,
+        )
+      : data?.matchPercentage;
   const uploadLoading = upload.loading || resume.loading;
   return (
     <AppShell eyebrow="Resume lab">
@@ -152,7 +185,7 @@ function ResumeContent() {
                   Matching
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {(data.matchingSkills || []).map((skill) => (
+                  {matchingSkills.map((skill) => (
                     <span
                       key={skill}
                       className="flex items-center gap-1 rounded-full bg-[var(--leaf-soft)] px-3 py-1.5 text-xs font-medium text-[var(--leaf)]"
@@ -166,41 +199,137 @@ function ResumeContent() {
                   Worth adding
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {(data.missingSkills || []).map((skill) => (
+                  {skillsToLearn.map((skill) => (
                     <span
                       key={skill}
                       className="flex items-center gap-1 rounded-full bg-[#fbe8e2] px-3 py-1.5 text-xs font-medium text-[#9b4e3b]"
                     >
-                      <X size={13} />
+                      <X size={13} aria-hidden="true" />
                       {skill}
                     </span>
                   ))}
                 </div>
                 <SkillCoverageGraph
-                  matchingCount={(data.matchingSkills || []).length}
-                  missingCount={(data.missingSkills || []).length}
-                  matchPercentage={data.matchPercentage}
+                  matchingCount={matchingSkills.length}
+                  missingCount={skillsToLearn.length}
+                  matchPercentage={currentSignalMatchPercentage}
                 />
               </div>
             </div>
             <div className="rounded-2xl border border-[var(--line)] bg-white p-6">
-              <p className="text-xs font-bold uppercase tracking-wider text-[var(--leaf)]">
-                {data.roadmapDuration || roadmapDuration}-day roadmap
-              </p>
-              <h2 className="mt-2 text-xl font-semibold">
-                A practical next sprint
-              </h2>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--leaf)]">
+                    {data.roadmapDuration || roadmapDuration}-day roadmap
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold">
+                    A practical next sprint
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-[#fff5dd] px-3 py-2 text-sm font-semibold text-[#8b6422]">
+                  <Flame size={17} aria-hidden="true" />
+                  <span>{data.roadmapStreak || 0}-day streak</span>
+                </div>
+              </div>
+              {(() => {
+                const totalTasks = (data.roadmap || []).reduce(
+                  (total, week) => total + (week.tasks || []).length,
+                  0,
+                );
+                const completedTasks = (data.roadmap || []).reduce(
+                  (total, week, weekIndex) =>
+                    total +
+                    (week.tasks || []).filter(
+                      (_, taskIndex) =>
+                        data.roadmapProgress?.[weekIndex]?.completedTasks?.[
+                          taskIndex
+                        ],
+                    ).length,
+                  0,
+                );
+                const progress =
+                  totalTasks > 0
+                    ? Math.round((completedTasks / totalTasks) * 100)
+                    : 0;
+
+                return (
+                  <div className="mt-5">
+                    <div className="mb-2 flex items-center justify-between text-xs">
+                      <span className="font-semibold text-[var(--ink-muted)]">
+                        Roadmap progress
+                      </span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {completedTasks} of {totalTasks} topics · {progress}%
+                      </span>
+                    </div>
+                    <div
+                      className="h-2 overflow-hidden rounded-full bg-[var(--leaf-soft)]"
+                      role="progressbar"
+                      aria-label="Roadmap progress"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progress}
+                    >
+                      <div
+                        className="h-full rounded-full bg-[var(--leaf)] transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+              {updateRoadmapTask.error && (
+                <p className="mt-3 text-sm text-[#9b4e3b]" role="alert">
+                  {updateRoadmapTask.error}
+                </p>
+              )}
+              {updateRoadmapTask.loading && (
+                <p className="mt-3 text-sm text-[var(--ink-muted)]" role="status">
+                  Saving your progress...
+                </p>
+              )}
               <div className="mt-5 max-h-[560px] space-y-4 overflow-y-auto pr-3">
-                {(data.roadmap || []).map((week) => (
+                {(data.roadmap || []).map((week, weekIndex) => (
                   <div
                     key={week.week}
                     className="border-l-2 border-[var(--leaf-soft)] pl-4"
                   >
                     <p className="text-sm font-semibold">{week.week}</p>
                     <ul className="mt-2 space-y-1 text-sm text-[var(--ink-muted)]">
-                      {week.tasks.map((task) => (
-                        <li key={task}>· {task}</li>
-                      ))}
+                      {week.tasks.map((task, taskIndex) => {
+                        const completed =
+                          data.roadmapProgress?.[weekIndex]?.completedTasks?.[
+                            taskIndex
+                          ] || false;
+                        return (
+                          <li key={`${weekIndex}-${taskIndex}`}>
+                            <label className="flex cursor-pointer items-start gap-2 py-1">
+                              <input
+                                type="checkbox"
+                                checked={completed}
+                                disabled={updateRoadmapTask.loading}
+                                onChange={(event) =>
+                                  toggleRoadmapTask(
+                                    weekIndex,
+                                    taskIndex,
+                                    event.target.checked,
+                                  )
+                                }
+                                className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--leaf)]"
+                              />
+                              <span
+                                className={
+                                  completed
+                                    ? "text-[var(--ink-muted)] line-through opacity-70"
+                                    : ""
+                                }
+                              >
+                                {task}
+                              </span>
+                            </label>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}

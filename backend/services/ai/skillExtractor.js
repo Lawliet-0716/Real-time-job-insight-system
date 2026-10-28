@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import groq from "./groq.service.js";
 import SkillCache from "../../models/SkillCache.js";
+import { detectJobSkills } from "../../utils/detectJobSkills.js";
 
 const MAX_DESCRIPTION_LENGTH = 6000;
 const MAX_SKILLS = 25;
@@ -17,6 +18,7 @@ export async function extractJobSkills(title = "", description = "") {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, MAX_DESCRIPTION_LENGTH);
+    const detectedSkills = detectJobSkills(cleanTitle, cleanDescription);
 
     // Create cache hash
     const descriptionHash = crypto
@@ -32,7 +34,12 @@ export async function extractJobSkills(title = "", description = "") {
     if (cachedSkills) {
       console.log("✅ Skills loaded from cache");
 
-      return Array.isArray(cachedSkills.skills) ? cachedSkills.skills : [];
+      return [
+        ...new Set([
+          ...(Array.isArray(cachedSkills.skills) ? cachedSkills.skills : []),
+          ...detectedSkills,
+        ]),
+      ].slice(0, MAX_SKILLS);
     }
 
     // AI prompt
@@ -88,7 +95,7 @@ Rules:
     if (!content) {
       console.error("❌ Empty AI response");
 
-      return [];
+      return detectedSkills;
     }
 
     console.log("🤖 AI Response received");
@@ -119,7 +126,7 @@ Rules:
     if (jsonStart === -1 || jsonEnd === -1) {
       console.error("❌ No JSON object found in AI response");
 
-      return [];
+      return detectedSkills;
     }
 
     const jsonText = content.substring(jsonStart, jsonEnd + 1);
@@ -137,7 +144,7 @@ Rules:
 
       console.error(jsonText);
 
-      return [];
+      return detectedSkills;
     }
 
     // ---------------------------------------
@@ -151,8 +158,7 @@ Rules:
       .map((skill) => skill.trim())
       .filter(Boolean);
 
-    // Remove duplicates
-    skills = [...new Set(skills)];
+    skills = [...new Set([...skills, ...detectedSkills])];
 
     // Limit skills
     skills = skills.slice(0, MAX_SKILLS);
@@ -180,6 +186,6 @@ Rules:
 
     console.error(error.response?.data || error.message);
 
-    return [];
+    return detectJobSkills(title, description);
   }
 }

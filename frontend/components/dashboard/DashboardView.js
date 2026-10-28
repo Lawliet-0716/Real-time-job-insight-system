@@ -88,6 +88,7 @@ function DashboardContent() {
   const data = dashboard.data?.data;
   const stats = data?.stats || {};
   const resume = data?.resume;
+  const skillsToLearn = resume?.skillsToLearn ?? resume?.missingSkills ?? [];
   const jobs = data?.recentJobs || [];
   const skills = data?.trendingSkills || [];
   const dailyTrend = data?.dailyTrend || [];
@@ -296,25 +297,128 @@ function DashboardContent() {
             </div>
           )}
         </div>
-        <div className="rounded-2xl bg-[#233f33] p-6 text-white sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#acd3b9]">
-            Resume lab
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
-            {resume
-              ? `${resume.atsScore}% ready for ${resume.targetRole}`
-              : "Turn your resume into a signal."}
-          </h2>
+        <div className="flex min-h-[520px] flex-col rounded-2xl bg-[#233f33] p-6 text-white sm:p-8 xl:min-h-[620px]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#acd3b9]">
+                Resume lab
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+                {resume
+                  ? "Your resume is becoming a signal."
+                  : "Build your career signal."}
+              </h2>
+            </div>
+            <span className="text-4xl font-semibold tracking-[-0.06em] text-[#f5d98f]">
+              {resume ? `${Math.round(resume.atsScore || 0)}%` : "0%"}
+            </span>
+          </div>
+          <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#416354]">
+            <div
+              className="h-full rounded-full bg-[#f5d98f] transition-all"
+              style={{
+                width: `${Math.min(100, Math.max(0, resume?.atsScore || 0))}%`,
+              }}
+            />
+          </div>
           <p className="mt-4 text-sm leading-6 text-[#c7d9cf]">
             {resume
-              ? `${resume.missingSkills?.length || 0} skills are worth adding to your next learning sprint.`
-              : "Upload a PDF to see your market match, gaps, and a practical roadmap."}
+              ? `${skillsToLearn.length} skills are worth adding to your next learning sprint for ${resume.targetRole || "your target role"}.`
+              : "Upload a PDF to see your market match, skill gaps, and a practical roadmap built around your experience."}
           </p>
+          {resume ? (
+            <>
+              <div className="mt-5 grid grid-cols-3 divide-x divide-[#527461] border-y border-[#527461] py-4">
+                <div className="pr-3">
+                  <p className="text-xl font-semibold text-[#f6f7f2]">
+                    {Math.round(resume.atsScore || 0)}%
+                  </p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-[#acd3b9]">
+                    ATS score
+                  </p>
+                </div>
+                <div className="px-3">
+                  <p className="text-xl font-semibold text-[#f6f7f2]">
+                    {Math.round(resume.matchPercentage || 0)}%
+                  </p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-[#acd3b9]">
+                    Market match
+                  </p>
+                </div>
+                <div className="pl-3">
+                  <p className="text-xl font-semibold text-[#f6f7f2]">
+                    {resume.extractedSkills?.length || 0}
+                  </p>
+                  <p className="mt-1 text-[10px] uppercase tracking-wider text-[#acd3b9]">
+                    Skills found
+                  </p>
+                </div>
+              </div>
+              {skillsToLearn.length > 0 && (
+                <div className="mt-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#acd3b9]">
+                    Next focus
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {skillsToLearn.slice(0, 5).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full border border-[#527461] px-2.5 py-1 text-xs text-[#d9e6dd]"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                    {skillsToLearn.length > 5 && (
+                      <span className="px-1 py-1 text-xs text-[#acd3b9]">
+                        +{skillsToLearn.length - 5} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              {resume.roadmap?.[0] && (
+                <div className="mt-6 rounded-xl border border-[#527461] bg-[#1f382e] p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#acd3b9]">
+                      Next sprint
+                    </p>
+                    <span className="text-xs font-semibold text-[#f5d98f]">
+                      {resume.roadmap[0].week}
+                    </span>
+                  </div>
+                  <ul className="mt-3 space-y-2 text-sm leading-5 text-[#d9e6dd]">
+                    {(resume.roadmap[0].tasks || []).slice(0, 3).map((task) => (
+                      <li key={task} className="flex gap-2">
+                        <span className="text-[#f5d98f]">-</span>
+                        <span>{task}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-5 space-y-3 border-t border-[#527461] pt-5 text-sm text-[#d9e6dd]">
+              <div className="flex items-center justify-between">
+                <span>Resume strength and ATS score</span>
+                <span className="text-[#f5d98f]">01</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Market skills you already match</span>
+                <span className="text-[#f5d98f]">02</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>A focused learning roadmap</span>
+                <span className="text-[#f5d98f]">03</span>
+              </div>
+            </div>
+          )}
           <Link
             href="/resume"
-            className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#f5d98f]"
+            className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5d98f] px-4 py-3 text-sm font-semibold text-[#233f33] transition hover:bg-[#ffe6a8]"
           >
-            Open resume lab <ArrowUpRight size={15} />
+            {resume ? "Open resume lab" : "Upload your resume"}{" "}
+            <ArrowUpRight size={15} />
           </Link>
         </div>
       </section>

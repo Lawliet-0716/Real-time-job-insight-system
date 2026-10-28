@@ -21,6 +21,8 @@
  * @property {string[]} extractedSkills
  * @property {string[]} matchingSkills
  * @property {string[]} missingSkills
+ * @property {string[]} learnedSkills
+ * @property {string[]} skillsToLearn
  * @property {{skill: string, demandPercentage: number, priority: string}[]} skillGaps
  * @property {string[]} recommendations
  * @property {{week: string, tasks: string[]}[]} roadmap

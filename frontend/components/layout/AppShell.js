@@ -53,7 +53,7 @@ export default function AppShell({ children, eyebrow = "Workspace" }) {
       <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[#f9faf6]/95 backdrop-blur">
         <div className="mx-auto flex w-full flex-wrap items-center gap-4 px-5 py-4 sm:px-8 md:grid md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-8 lg:px-10">
           <Link
-            href="/"
+            href="/dashboard"
             className="mr-auto flex shrink-0 items-center gap-3 md:mr-0"
           >
             <Image

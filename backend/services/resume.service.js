@@ -1,4 +1,6 @@
 import Resume from "../models/Resume.js";
+import User from "../models/User.js";
+import { getRoadmapStreak } from "../utils/roadmapStreak.js";
 
 import { extractTextFromPDF } from "../utils/pdfExtractor.js";
 
@@ -11,6 +13,10 @@ import { generateRecommendations } from "./ai/recommendation.service.js";
 import { generateRoadmap } from "./ai/roadmap.service.js";
 
 import { compareSkills } from "./compareSkills.service.js";
+import {
+  getCompletedWeekLearnedSkills,
+  getSkillsToLearn,
+} from "../utils/learningSkills.js";
 
 const MIN_ROADMAP_DURATION = 30;
 
@@ -135,6 +141,10 @@ export async function uploadResumeService(userId, file, roadmapDuration) {
 
     roadmap,
 
+    roadmapProgress: roadmap.map((week) => ({
+      completedTasks: week.tasks.map(() => false),
+    })),
+
     roadmapDuration: normalizedRoadmapDuration,
   });
 
@@ -146,9 +156,102 @@ export async function uploadResumeService(userId, file, roadmapDuration) {
 // ==========================
 
 export async function getMyResumeService(userId) {
-  return await Resume.findOne({
+  const resume = await Resume.findOne({
     user: userId,
   }).sort({ createdAt: -1 });
+
+  if (!resume) return null;
+
+  const user = await User.findById(userId).select("roadmapActivityDates");
+  const roadmapActivityDates = user?.roadmapActivityDates || [];
+
+  return {
+    ...resume.toObject(),
+    skillsToLearn: getSkillsToLearn(
+      resume.missingSkills,
+      resume.learnedSkills,
+    ),
+    roadmapActivityDates,
+    roadmapStreak: getRoadmapStreak(roadmapActivityDates),
+  };
+}
+
+export async function updateRoadmapTaskService(
+  userId,
+  weekIndex,
+  taskIndex,
+  completed,
+) {
+  if (
+    !Number.isInteger(weekIndex) ||
+    !Number.isInteger(taskIndex) ||
+    typeof completed !== "boolean"
+  ) {
+    const error = new Error("Roadmap task update is invalid.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const resume = await Resume.findOne({ user: userId }).sort({
+    createdAt: -1,
+  });
+
+  if (!resume) {
+    const error = new Error("Resume not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const week = resume.roadmap[weekIndex];
+  if (!week || taskIndex < 0 || taskIndex >= week.tasks.length) {
+    const error = new Error("Roadmap task not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  resume.roadmapProgress = resume.roadmap.map((roadmapWeek, index) => {
+    const completedTasks =
+      resume.roadmapProgress?.[index]?.completedTasks || [];
+    return {
+      completedTasks: roadmapWeek.tasks.map(
+        (_, taskPosition) => Boolean(completedTasks[taskPosition]),
+      ),
+    };
+  });
+  resume.roadmapProgress[weekIndex].completedTasks[taskIndex] = completed;
+  resume.learnedSkills = getCompletedWeekLearnedSkills(
+    resume.missingSkills,
+    resume.learnedSkills || [],
+    resume.roadmap,
+    resume.roadmapProgress,
+  );
+  await resume.save();
+
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (completed) {
+    const today = new Date().toISOString().slice(0, 10);
+    if (!user.roadmapActivityDates.includes(today)) {
+      user.roadmapActivityDates.push(today);
+      await user.save();
+    }
+  }
+
+  const roadmapActivityDates = user.roadmapActivityDates;
+  return {
+    ...resume.toObject(),
+    skillsToLearn: getSkillsToLearn(
+      resume.missingSkills,
+      resume.learnedSkills,
+    ),
+    roadmapActivityDates,
+    roadmapStreak: getRoadmapStreak(roadmapActivityDates),
+  };
 }
 
 // ==========================
@@ -194,6 +297,12 @@ export async function analyzeMyResumeService(userId, roadmapDuration) {
   // ==========================
 
   resume.missingSkills = analysis.missingSkills;
+  resume.learnedSkills = (resume.learnedSkills || []).filter((learnedSkill) =>
+    analysis.missingSkills.some(
+      (missingSkill) =>
+        missingSkill.trim().toLowerCase() === learnedSkill.trim().toLowerCase(),
+    ),
+  );
 
   // ==========================
   // Update Skill Gaps
@@ -244,12 +353,19 @@ export async function analyzeMyResumeService(userId, roadmapDuration) {
 
     extractedSkills: resume.extractedSkills,
 
-    missingSkills: analysis.missingSkills,
+    missingSkills: getSkillsToLearn(
+      analysis.missingSkills,
+      resume.learnedSkills,
+    ),
 
     atsScore: analysis.atsScore,
 
     durationDays: normalizedRoadmapDuration,
   });
+
+  resume.roadmapProgress = resume.roadmap.map((week) => ({
+    completedTasks: week.tasks.map(() => false),
+  }));
 
   // ==========================
   // Save Updated Resume Analysis

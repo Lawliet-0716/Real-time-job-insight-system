@@ -33,7 +33,7 @@ export function clearToken() {
 async function request(path, options = {}, baseUrl = API_URL) {
   const headers = new Headers(options.headers || {});
   const token = getToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
+  if (token) headers.set("Authorization", "Bearer " + token);
   if (!(options.body instanceof FormData))
     headers.set("Content-Type", "application/json");
 
@@ -101,5 +101,10 @@ export const api = {
     request("/api/resume/analyze", {
       method: "POST",
       body: JSON.stringify({ roadmapDuration }),
+    }),
+  updateRoadmapTask: (weekIndex, taskIndex, completed) =>
+    request("/api/resume/roadmap/task", {
+      method: "PATCH",
+      body: JSON.stringify({ weekIndex, taskIndex, completed }),
     }),
 };
